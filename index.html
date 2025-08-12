@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DevHub — Pornografia Gratuita</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --panel:#0f0f0f;
+      --orange:#ff8a00;
+      --muted:#bdbdbd;
+      --glass: rgba(255,255,255,0.03);
+      --accent-glow: 0 10px 30px rgba(255,138,0,0.12);
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:radial-gradient(1200px 600px at 10% 10%, rgba(255,138,0,0.02), transparent), var(--bg);color:#fff}
+    a{color:inherit;text-decoration:none}
+
+    /* Header */
+    header{position:fixed;left:0;right:0;top:0;z-index:50;backdrop-filter: blur(6px);display:flex;align-items:center;justify-content:space-between;padding:14px 20px;gap:12px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{display:flex;align-items:center;gap:10px}
+    .frb-rect{background:var(--orange);padding:6px 10px;border-radius:6px;font-weight:800;color:#000;letter-spacing:0.6px}
+    .hub{color:#fff;font-weight:800;font-size:18px}
+
+    /* Nav */
+    nav{display:flex;gap:14px;align-items:center}
+    .nav-links{display:flex;gap:12px;align-items:center}
+    .cta{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px}
+
+    /* burger */
+    .burger{display:none;width:44px;height:44px;border-radius:10px;align-items:center;justify-content:center;background:var(--glass);border:1px solid rgba(255,255,255,0.03)}
+    .burger span{display:block;width:18px;height:2px;background:#fff;position:relative}
+    .burger span:before,.burger span:after{content:"";position:absolute;left:0;right:0;height:2px;background:#fff}
+    .burger span:before{top:-6px}.burger span:after{top:6px}
+
+    /* Hero */
+    .hero{min-height:28vh;padding-top:86px;padding-bottom:28px;display:flex;align-items:center}
+    .hero-inner{width:100%;max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .hero-left{flex:1}
+    .hero-right{flex:1;display:flex;align-items:center;justify-content:center}
+    h1{margin:0;font-size:clamp(28px,6vw,48px);line-height:1.02}
+    p.lead{color:var(--muted);margin-top:10px;font-size:15px;max-width:560px}
+    .search{margin-top:18px;display:flex;gap:8px}
+    .search input{flex:1;padding:12px 14px;border-radius:12px;border:0;background:rgba(255,255,255,0.03);color:#fff}
+    .search button{padding:12px 16px;border-radius:12px;border:0;background:var(--orange);color:#000;font-weight:700}
+
+    /* Particles canvas sits behind */
+    #tsparticles{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+    /* Gallery */
+    .container{position:relative;z-index:10;max-width:1200px;margin:22px auto;padding:0 20px}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:transform .35s cubic-bezier(.2,.9,.3,1), box-shadow .35s}
+    .card:hover{transform:translateY(-8px);box-shadow:var(--accent-glow)}
+    .thumb{display:block;width:100%;height:170px;object-fit:cover;background:#111}
+    .meta{padding:12px}
+    .title{font-weight:700;font-size:15px}
+    .subtitle{color:var(--muted);font-size:13px;margin-top:6px}
+    .tag{position:absolute;left:12px;top:12px;background:rgba(0,0,0,0.6);padding:6px 8px;border-radius:6px;font-weight:700}
+    .play{position:absolute;right:12px;bottom:12px;background:var(--orange);padding:10px;border-radius:999px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;color:#000;font-weight:800}
+
+    /* Responsive */
+    @media (max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}.hero-inner{flex-direction:column;align-items:flex-start}.hero-right{width:100%;margin-top:18px}}
+    @media (max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}.nav-links{display:none}.burger{display:flex}}
+    @media (max-width:420px){.grid{grid-template-columns:1fr}.hero{padding-top:76px}}
+
+    /* Modal */
+    .modal{position:fixed;inset:0;background:linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.88));display:flex;align-items:center;justify-content:center;padding:20px;z-index:60;opacity:0;pointer-events:none;transition:opacity .25s}
+    .modal.open{opacity:1;pointer-events:auto}
+    .player{width:min(1100px,98%);background:#000;border-radius:12px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,0.7)}
+    .player video{width:100%;height:auto;display:block}
+    .close-btn{position:absolute;right:18px;top:18px;background:rgba(255,255,255,0.04);border-radius:10px;padding:8px;cursor:pointer}
+
+    /* small flourishes */
+    .glow-line{height:4px;width:100%;background:linear-gradient(90deg, transparent, rgba(255,138,0,0.6), transparent);filter:blur(10px);margin-top:10px;border-radius:6px}
+    .footer{margin:48px 0 120px;color:var(--muted);text-align:center}
+  </style>
+</head>
+<body>
+  <div id="tsparticles"></div>
+
+  <header>
+    <div class="brand">
+      <div class="logo">
+        <div class="frb-rect">Dev</div>
+        <div class="hub">Hub</div>
+      </div>
+      <div style="color:var(--muted);font-weight:600;margin-left:6px">Fabri & Robert Dueñas</div>
+    </div>
+    <nav>
+      <div class="nav-links">
+        <a class="cta">Explorar</a>
+        <a class="cta">Destacados</a>
+        <a class="cta">Sobre</a>
+      </div>
+      <div class="burger" id="burger" aria-label="abrir menú"><span></span></div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-inner container">
+        <div class="hero-left">
+          <h1>DevHub — Pornografia 100% Gratis, Alta Calidad</h1>
+          <p class="lead">Sin condon de Fabri y RB Dueñas, 100% sexo salvaje y gay.</p>
+          <div class="search">
+            <input id="searchInput" placeholder="Buscar video, lugar, etiqueta...">
+            <button id="searchBtn">Buscar</button>
+          </div>
+          <div class="glow-line"></div>
+        </div>
+        <div class="hero-right">
+          <!-- Floating card -->
+          <div style="width:320px;border-radius:16px;padding:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);box-shadow:var(--accent-glow)">
+            <div style="font-weight:800">Último video</div>
+            <div style="color:var(--muted);margin-top:8px">Pendejo no dura nada - 12 de junio 2025</div>
+            <div style="height:10px"></div>
+            <div style="display:flex;gap:8px">
+              <div style="flex:1;background:#0b0b0b;height:72px;border-radius:10px"></div>
+              <div style="width:70px;background:var(--orange);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#000;font-weight:800">Play</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container">
+      <div class="grid" id="gallery">
+        <!-- Cards generated by JS -->
+      </div>
+
+      <div class="footer">FRBHub • Diseñado por RataLife</div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="player" role="dialog" aria-modal="true">
+      <div style="position:relative">
+        <div class="close-btn" id="closeBtn">✕</div>
+      </div>
+      <video id="modalVideo" controls playsinline preload="metadata">
+        <source src="" type="video/mp4">
+        Tu navegador no soporta video.
+      </video>
+    </div>
+  </div>
+
+  <script>
+    // Sample gallery data (replace src with your files or URLs)
+    const videos = [
+      {id:'v1',title:'Venida sin condon',sub:'Mayo 2024 — 4:32',src:'videos/roadtrip.mp4',poster:'https://cdn77-pic.xvideos-cdn.com/videos/thumbs169poster/83/bb/ab/83bbabf8cbd943d0ab6a9124b076a8fe-2/83bbabf8cbd943d0ab6a9124b076a8fe.15.jpg'},
+      {id:'v2',title:'Sexo en Perú',sub:'Julio 2023 — 2:10',src:'videos/cumple.mp4',poster:'https://cdn77-pic.xvideos-cdn.com/videos/thumbs169ll/f9/b9/7c/f9b97cd298869df51c0c3a5ba7d82bfc/f9b97cd298869df51c0c3a5ba7d82bfc.24.jpg'},
+      {id:'v3',title:'Steph nos graba en secreto',sub:'Enero 2025 — 6:05',src:'videos/sierra.mp4',poster:'https://gay0day.com/contents/videos_screenshots/39000/39687/preview_720p.mp4.jpg'},
+      {id:'v4',title:'En la ducha',sub:'Agosto 2022 — 3:41',src:'videos/fogata.mp4',poster:'https://cdn77-pic.xvideos-cdn.com/videos/thumbs169poster/a6/87/50/a6875052f9f372aff081187144a70d4c/a6875052f9f372aff081187144a70d4c.19.jpg'},
+      {id:'v5',title:'Cojemos con viagra',sub:'Abril 2024 — 5:12',src:'videos/road2.mp4',poster:'https://ei.phncdn.com/videos/202307/15/435522801/original/(m=qIVQ4XYbeaSaaTbaAaaaa)(mh=lBWrngYEl1sNkRz-)0.jpg'},
+      {id:'v6',title:'Fabri se pone tetas falsas',sub:'Mayo 2023 — 1:50',src:'videos/bici.mp4',poster:'https://ei.phncdn.com/videos/202401/23/446975211/original/(m=eaSaaTbaAaaaa)(mh=3j8xcqcexpfgbb60)8.jpg'},
+      {id:'v7',title:'RB se la come a Noza',sub:'Diciembre 2024 — 8:09',src:'videos/cena.mp4',poster:'https://cdn77-pic.xvideos-cdn.com/videos/thumbs169poster/a2/02/0d/a2020d35235f6ebe1e49c5655cfbf0c7-1/a2020d35235f6ebe1e49c5655cfbf0c7.20.jpg'},
+      {id:'v8',title:'Sexito Rico',sub:'Marzo 2025 — 0:58',src:'videos/atardecer.mp4',poster:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSG_h1Pm9P8Qw8sQCzCF_uCDqUqB_GgJfV1cQ&s'},
+    ];
+
+    const gallery = document.getElementById('gallery');
+    function mkCard(v){
+      const div = document.createElement('div');div.className='card';
+      div.innerHTML = `
+        <div class="tag">${v.sub.split('—')[0].trim()}</div>
+        <img class="thumb" src="${v.poster}" alt="${v.title}">
+        <div class="meta">
+          <div class="title">${v.title}</div>
+          <div class="subtitle">${v.sub}</div>
+        </div>
+        <div class="play">▶</div>
+      `;
+      div.addEventListener('click',()=>openVideo(v));
+      return div;
+    }
+    videos.forEach(v=>gallery.appendChild(mkCard(v)));
+
+    // Modal player
+    const modal = document.getElementById('modal');
+    const modalVideo = document.getElementById('modalVideo');
+    const closeBtn = document.getElementById('closeBtn');
+    function openVideo(v){
+      modal.classList.add('open');
+      modalVideo.pause();
+      modalVideo.querySelector('source').src = v.src;
+      modalVideo.load();
+      setTimeout(()=>modalVideo.play(),200);
+    }
+    function closeVideo(){
+      modal.classList.remove('open');
+      modalVideo.pause();
+      modalVideo.currentTime=0;
+      modalVideo.querySelector('source').src = '';
+      modalVideo.load();
+    }
+    closeBtn.addEventListener('click',closeVideo);
+    modal.addEventListener('click',(e)=>{ if(e.target===modal) closeVideo(); });
+
+    // Simple search
+    document.getElementById('searchBtn').addEventListener('click',()=>{
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const filtered = videos.filter(v=>v.title.toLowerCase().includes(q) || v.sub.toLowerCase().includes(q));
+      gallery.innerHTML='';
+      (filtered.length?filtered:videos).forEach(v=>gallery.appendChild(mkCard(v)));
+    });
+
+    // Burger (mobile) - simple toggle
+    const burger = document.getElementById('burger');
+    burger.addEventListener('click',()=>{
+      const links = document.querySelector('.nav-links');
+      if(links.style.display==='flex') links.style.display='none'; else links.style.display='flex';
+    });
+
+    // Particles (tsParticles) - load dynamically
+    (function loadParticles(){
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/tsparticles@2.12.1/tsparticles.bundle.min.js';
+      s.onload = ()=>{
+        tsParticles.load('tsparticles', {
+          fpsLimit:60,
+          particles:{
+            number:{value:40,density:{enable:true,value_area:900}},
+            color:{value:['#ff8a00','#ffffff']},
+            shape:{type:'circle'},
+            opacity:{value:0.12,random:{enable:true,minimumValue:0.02}},
+            size:{value:{min:1,max:6}},
+            move:{enable:true,speed:0.8,direction:'none',outMode:'out'}
+          },
+          interactivity:{events:{onHover:{enable:true,mode:'bubble'},onClick:{enable:true,mode:'push'}},modes:{bubble:{distance:120,size:8,duration:2},push:{quantity:2}}}
+        });
+      };
+      document.body.appendChild(s);
+    })();
+
+    // Small entrance animations
+    window.addEventListener('load',()=>{
+      document.querySelectorAll('.card').forEach((c,i)=>{
+        c.style.opacity=0;c.style.transform='translateY(14px)';
+        setTimeout(()=>{c.style.transition='all .6s cubic-bezier(.2,.9,.3,1)';c.style.opacity=1;c.style.transform='translateY(0)';}, 90*i);
+      });
+    });
+
+  </script>
+</body>
+</html>
